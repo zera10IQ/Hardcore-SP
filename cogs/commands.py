@@ -47,4 +47,4 @@ class Commands(commands.Cog):
 
 # Función de setup obligatoria para cargar el Cog
 async def setup(bot):
-    await bot.add_cog(commands(bot))
+    await bot.add_cog(Commands(bot))
