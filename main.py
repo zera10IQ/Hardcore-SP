@@ -7,7 +7,9 @@ load_dotenv()
 token = os.getenv('token')
 
 # Configuración inicial
-intents = discord.Intents.all()
+intents = discord.Intents.default()
+intents.message_content = True # Solo pedimos leer mensajes
+intents.members = True         # Y ver miembros
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # Esta función se ejecuta al inicio para cargar los Cogs
