@@ -1,5 +1,5 @@
 ## MineStatus ⛏️
-This is a Discord Bot designed for only Java servers for now. bedrock is on the sight after I feel more comfortable with the main version! :)
+This is an Discord Bot designed for only Java servers for now. bedrock is on the sight after I feel more comfortable with the main version! :)
 
 ## ✨ Technologies
 - Python
