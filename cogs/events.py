@@ -1,31 +1,50 @@
 import discord
-from discord.ext import commands
+import json
+import os
+from discord.ext import commands, tasks
+from mcstatus import JavaServer
+
+CONFIG_FILE = "config.json"
 
 class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.presence_loop.start()
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        # Este on_ready es específico de este archivo, se ejecuta junto al del main
-        print(f'👂 Sistema de eventos listo.')
+    def cog_unload(self):
+        self.presence_loop.cancel()
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if message.author == self.bot.user:
+    def get_config(self):
+        if os.path.exists(CONFIG_FILE):
+            with open(CONFIG_FILE, "r") as f:
+                return json.load(f)
+        return None
+
+    @tasks.loop(seconds=30)
+    async def presence_loop(self):
+        config = self.get_config()
+        
+        if not config:
+            # Si no hay config, ponemos un estado de espera
+            await self.bot.change_presence(activity=discord.Game(name="Esperando /setup"))
             return
-        
-        # Lógica personalizada
-        if 'sv on?' in message.content.lower():
-            await message.channel.send(f'No caxo, aún no me configuran tan vio pa la wea')
-        
-        # NOTA IMPORTANTE:
-        # En los Cogs NO necesitas poner "await bot.process_commands(message)"
-        # El bot lo hace automáticamente. Si lo pones, podrías duplicar comandos.
 
-    @commands.command()
-    async def info(self, ctx):
-        await ctx.send(f'Soy un bot de Hardcore SP :) (Desde un Cog)')
+        try:
+            address = f"{config['ip']}:{config['port']}"
+            server = JavaServer.lookup(address)
+            status = server.status()
+            
+            activity = discord.Game(name=f"Minecraft: {status.players.online} Jugadores")
+            await self.bot.change_presence(status=discord.Status.online, activity=activity)
+            
+        except Exception:
+            await self.bot.change_presence(status=discord.Status.dnd, activity=discord.Game(name="Servidor Offline"))
+
+    @presence_loop.before_loop
+    async def before_presence_loop(self):
+        await self.bot.wait_until_ready()
+
+    # ... (resto de tus eventos on_message, etc.) ...
 
 async def setup(bot):
     await bot.add_cog(Events(bot))
