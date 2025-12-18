@@ -1,3 +1,7 @@
 discord
 requests
 mcstatus
+
+# /users y te manda al bloque de excepción naranja ("Modo Status"), 
+# asegúrate de que en tu router también esté abierto el puerto UDP 
+# (Query usa UDP, el juego usa TCP) para el puerto 25565.

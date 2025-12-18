@@ -21,7 +21,7 @@ async def load_extensions():
         'cogs.status',         # El comando /sv
         'cogs.rich-presence',  # Estado del bot (Jugando a...)
         'cogs.events'          # Eventos de chat
-        # 'cogs.user-list'     # Descomentar cuando termine el archivo
+        'cogs.user-list'       # Comando para visualizar lista de jugadores conectados
     ]
     
     for extension in initial_extensions:
