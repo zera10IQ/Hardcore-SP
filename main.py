@@ -1,5 +1,6 @@
 import discord
 import os
+import asyncio
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -8,17 +9,19 @@ token = os.getenv('token')
 
 # Configuración inicial
 intents = discord.Intents.default()
-intents.message_content = True # Solo pedimos leer mensajes
-intents.members = True         # Y ver miembros
+intents.message_content = True 
+intents.members = True         
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# Esta función se ejecuta al inicio para cargar los Cogs
+# Función para cargar extensiones
 async def load_extensions():
-    # Cargamos los archivos que están en la carpeta 'cogs'
-    # Nota: Si creas más archivos, agrégalos a esta lista
+    # Lista actualizada de archivos en la carpeta cogs
     initial_extensions = [
-        'cogs.commands',
-        'cogs.events'
+        'cogs.setup',          # Para configurar la IP
+        'cogs.status',         # El comando /sv
+        'cogs.rich-presence',  # Estado del bot (Jugando a...)
+        'cogs.events'          # Eventos de chat
+        # 'cogs.user-list'     # Descomentar cuando termine el archivo
     ]
     
     for extension in initial_extensions:
@@ -28,32 +31,20 @@ async def load_extensions():
         except Exception as e:
             print(f'❌ Error cargando {extension}: {e}')
 
-# Setup Hook es la forma moderna de iniciar cosas antes de que el bot corra
 @bot.event
 async def on_ready():
-    # OJO: Es mejor no poner el sync aquí automático para no saturar la API
     print(f'✅ Logueado como {bot.user} (Main System Online)')
+    # Sincronizamos los comandos slash al iniciar
+    try:
+        synced = await bot.tree.sync()
+        print(f"🔄 Slash commands sincronizados: {len(synced)}")
+    except Exception as e:
+        print(f"⚠️ Error sincronizando comandos: {e}")
 
-# Tu comando de sincronización (Mantenlo en main para control total)
-@bot.command()
-async def sync(ctx):
-    # Reemplaza con tu ID real si quieres seguridad
-    if ctx.author.id == 419746321252089866: 
-        print("Sincronizando globalmente...")
-        try:
-            synced = await bot.tree.sync()
-            await ctx.send(f"✅ ¡Listo! Se han sincronizado {len(synced)} comandos.")
-        except Exception as e:
-            await ctx.send(f"❌ Error: {e}")
-    else:
-        await ctx.send("🔒 No tienes permiso.")
-
-# Arranque
 async def main():
     async with bot:
         await load_extensions()
         await bot.start(token)
 
 if __name__ == '__main__':
-    import asyncio
     asyncio.run(main())
